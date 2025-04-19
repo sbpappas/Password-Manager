@@ -1,0 +1,16 @@
+# nooo compiled files
+*.class
+
+# ignore IntelliJ or Eclipse configs, just to be safe. part of the default .gitignore
+.idea/
+*.iml
+.vscode/
+target/
+out/
+
+# the encrypted vault - i guess this would be ok, because it is encrypted right?
+vault.dat
+
+# ignore any plaintext test output
+*.txt
+*.csv
