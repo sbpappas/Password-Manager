@@ -29,10 +29,10 @@ public class VaultManager {
 
     public void listSites() {
         if (entries.isEmpty()) {
-            System.out.println("🕳️ Vault is empty.");
+            System.out.println("Vault is empty.");
             return;
         }
-        System.out.println("📁 Stored sites:");
+        System.out.println("Stored sites:");
         for (String site : entries.keySet()) {
             System.out.println(" - " + site);
         }

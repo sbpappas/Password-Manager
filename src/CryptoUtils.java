@@ -7,14 +7,14 @@ import java.util.Base64;
 
 public class CryptoUtils {
 
-    private static final int KEY_SIZE = 256;
+    private static final int KEY_SIZE = 256; //final is immutable
     private static final int ITERATIONS = 65536;
     private static final int SALT_LENGTH = 16;
     private static final int IV_LENGTH = 16;
 
-    // Derives an AES key from the master password (new salt generated per session)
+    // derives an AES key from the master password (new salt generated per session) - need switch
     public static SecretKey deriveKey(String password) throws Exception {
-        // In production, salt should be stored and reused
+        // should make it so salt can be stored and reused
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[SALT_LENGTH];
         random.nextBytes(salt);

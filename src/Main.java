@@ -16,8 +16,7 @@ public class Main {
             // Load or initialize vault
             VaultManager vault = new VaultManager("vault.dat", key);
 
-            boolean shutdown = false;
-            while (!shutdown) {
+            while (true) {
                 System.out.print("\n[Commands: add, list, get, exit]\n> ");
                 String command = scanner.nextLine().trim();
 
@@ -31,11 +30,11 @@ public class Main {
                         String password = scanner.nextLine();
                         vault.addEntry(new PasswordEntry(site, username, password));
                         System.out.println("✅ Entry added.");
-                        shutdown = true;
+                        break;
 
                     case "list":
                         vault.listSites();
-                        shutdown = true;
+                        break;
 
                     case "get":
                         System.out.print("Site to retrieve: ");
@@ -45,9 +44,9 @@ public class Main {
                             System.out.println("Username: " + entry.getUsername());
                             System.out.println("Password: " + entry.getPassword());
                         } else {
-                            System.out.println("❌ Entry not found.");
+                            System.out.println("entry NOT found.");
                         }
-                        shutdown = true;
+                        break;
 
                     case "exit":
                         vault.saveVault();
@@ -55,7 +54,7 @@ public class Main {
                         return;
 
                     default:
-                        System.out.println("❓ Unknown command.");
+                        System.out.println("❓ Unknown command. \nCommands: [add, list, get, exit]");
                 }
             }
 
