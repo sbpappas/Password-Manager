@@ -14,7 +14,7 @@ public class CryptoUtils {
     private static final int IV_LENGTH = 16;
 
     // derives an AES key from the master password (new salt generated per session) - need switch
-    public static SecretKey deriveKey(String password) throws Exception {
+    /*public static SecretKey deriveKey(String password) throws Exception {
         // should make it so salt can be stored and reused
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[SALT_LENGTH];
@@ -25,6 +25,15 @@ public class CryptoUtils {
 
         byte[] keyBytes = factory.generateSecret(spec).getEncoded();
         return new SecretKeySpec(keyBytes, "AES");
+    }*/
+
+    public static SecretKey deriveKey(String password) throws Exception {
+        byte[] salt = getOrCreateSalt();
+
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256"); //password based key derivation function with SHA256
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
+        SecretKey tmp = factory.generateSecret(spec);
+        return new SecretKeySpec(tmp.getEncoded(), "AES");
     }
 
     // Encrypts plain text using AES-CBC and returns Base64(salt + IV + ciphertext)
