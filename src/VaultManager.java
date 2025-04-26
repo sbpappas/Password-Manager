@@ -4,7 +4,6 @@ import java.util.*;
 import java.nio.file.Files; //for file output stream
 import java.nio.file.Paths;
 
-
 import java.nio.charset.StandardCharsets; //for bytearray to string decryption
 
 public class VaultManager {
@@ -53,7 +52,7 @@ public class VaultManager {
         }
 
         byte[] encrypted = CryptoUtils.encrypt(builder.toString().getBytes(StandardCharsets.UTF_8), key); //have to pass in bytearray
-        FileOutputStream fos = new FileOutputStream(VAULT_FILE);
+        FileOutputStream fos = new FileOutputStream(vaultFile);
             fos.write(encrypted);
             fos.close();
          //write to file
@@ -61,15 +60,8 @@ public class VaultManager {
     }
 
     private void loadVault() throws Exception {
-        StringBuilder encryptedData = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(vaultFile))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                encryptedData.append(line);
-            }
-        }
-
-        String decrypted = new String(CryptoUtils.decrypt(encryptedData, key), StandardCharsets.UTF_8); //make 
+        byte[] encryptedData = Files.readAllBytes(Paths.get(vaultFile));
+        String decrypted = new String(CryptoUtils.decrypt(encryptedData, key), StandardCharsets.UTF_8);
 
         for (String line : decrypted.split("\n")) {
             String[] parts = line.split(",", 3);
