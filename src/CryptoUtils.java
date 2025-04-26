@@ -7,7 +7,7 @@ import java.util.Base64;
 
 public class CryptoUtils {
 
-    private static final int KEY_SIZE = 256; //final is immutable
+    private static final int KEY_LENGTH = 256; //final is immutable
     private static final String SALT_FILE = "salt.bin";
     private static final int ITERATIONS = 65536;
     private static final int SALT_LENGTH = 16;
@@ -31,29 +31,31 @@ public class CryptoUtils {
         byte[] salt = getOrCreateSalt();
 
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256"); //password based key derivation function with SHA256
+        // i read that this hashes the password and salt together over 65,536 iterations. neat.
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
         SecretKey tmp = factory.generateSecret(spec);
-        return new SecretKeySpec(tmp.getEncoded(), "AES");
+        return new SecretKeySpec(tmp.getEncoded(), "AES"); //converts raw 256 bit key to AES SecretKey object which can be used by Cipher to encrypt/decrypt
     }
 
-    // Encrypts plain text using AES-CBC and returns Base64(salt + IV + ciphertext)
-    public static String encrypt(String plainText, SecretKey key) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-
-        byte[] iv = new byte[IV_LENGTH];
+    // Encrypts plain text using AES-CBC and returns Base64 -salt + IV + ciphertext
+    public static byte[] encrypt(byte[] data, SecretKey key) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //cbc = cipher block chaining
+        byte[] iv = new byte[16]; //random secret key to encrypt our data
         SecureRandom random = new SecureRandom();
         random.nextBytes(iv);
+    
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
-
         cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
-        byte[] encrypted = cipher.doFinal(plainText.getBytes());
-
-        byte[] encryptedWithIv = new byte[iv.length + encrypted.length];
-        System.arraycopy(iv, 0, encryptedWithIv, 0, iv.length);
-        System.arraycopy(encrypted, 0, encryptedWithIv, iv.length, encrypted.length);
-
-        return Base64.getEncoder().encodeToString(encryptedWithIv);
+    
+        byte[] encrypted = cipher.doFinal(data);
+    
+        // Prepend IV to ciphertext
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        outputStream.write(iv);
+        outputStream.write(encrypted);
+        return outputStream.toByteArray();
     }
+    
 
     // Decrypts Base64(salt + IV + ciphertext) using AES-CBC
     public static String decrypt(String cipherTextBase64, SecretKey key) throws Exception {
