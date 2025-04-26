@@ -1,6 +1,11 @@
 import javax.crypto.SecretKey;
 import java.io.*;
 import java.util.*;
+import java.nio.file.Files; //for file output stream
+import java.nio.file.Paths;
+
+
+import java.nio.charset.StandardCharsets; //for bytearray to string decryption
 
 public class VaultManager {
     private Map<String, PasswordEntry> entries = new HashMap<>();
@@ -47,10 +52,12 @@ public class VaultManager {
                    .append(entry.getPassword()).append("\n");
         }
 
-        String encrypted = CryptoUtils.encrypt(builder.toString(), key);
-        try (FileWriter writer = new FileWriter(vaultFile)) {
-            writer.write(encrypted); //write to file
-        }
+        byte[] encrypted = CryptoUtils.encrypt(builder.toString().getBytes(StandardCharsets.UTF_8), key); //have to pass in bytearray
+        FileOutputStream fos = new FileOutputStream(VAULT_FILE);
+            fos.write(encrypted);
+            fos.close();
+         //write to file
+        
     }
 
     private void loadVault() throws Exception {
@@ -62,7 +69,7 @@ public class VaultManager {
             }
         }
 
-        String decrypted = CryptoUtils.decrypt(encryptedData.toString(), key);
+        String decrypted = new String(CryptoUtils.decrypt(encryptedData, key), StandardCharsets.UTF_8); //make 
 
         for (String line : decrypted.split("\n")) {
             String[] parts = line.split(",", 3);

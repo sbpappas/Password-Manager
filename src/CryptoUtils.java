@@ -1,9 +1,11 @@
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.util.Base64;
+import javax.crypto.spec.*;
+import java.io.*;
+import java.nio.file.*;
+import java.security.*;
+import java.security.spec.*;
 
 public class CryptoUtils {
 
@@ -49,28 +51,38 @@ public class CryptoUtils {
     
         byte[] encrypted = cipher.doFinal(data);
     
-        // Prepend IV to ciphertext
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        outputStream.write(iv);
-        outputStream.write(encrypted);
+        outputStream.write(iv); // prepend IV to ciphertext
+        outputStream.write(encrypted); // ciphertext
         return outputStream.toByteArray();
     }
     
-
     // Decrypts Base64(salt + IV + ciphertext) using AES-CBC
-    public static String decrypt(String cipherTextBase64, SecretKey key) throws Exception {
-        byte[] cipherText = Base64.getDecoder().decode(cipherTextBase64);
+    public static byte[] decrypt(byte[] encryptedData, SecretKey key) throws Exception {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(encryptedData);
+        byte[] iv = new byte[16];
+        inputStream.read(iv);
 
-        byte[] iv = new byte[IV_LENGTH];
-        byte[] encrypted = new byte[cipherText.length - IV_LENGTH];
-
-        System.arraycopy(cipherText, 0, iv, 0, IV_LENGTH);
-        System.arraycopy(cipherText, IV_LENGTH, encrypted, 0, encrypted.length);
+        IvParameterSpec ivSpec = new IvParameterSpec(iv);
+        byte[] ciphertext = inputStream.readAllBytes();
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
-        byte[] decrypted = cipher.doFinal(encrypted);
+        cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
+        return cipher.doFinal(ciphertext);
+    }
 
-        return new String(decrypted);
+    //used in deriveKey() if we already made a salt, get it, if not make one
+    private static byte[] getOrCreateSalt() throws IOException {
+        File saltFile = new File(SALT_FILE);
+
+        if (saltFile.exists()) {
+            return Files.readAllBytes(saltFile.toPath());
+        } else {
+            byte[] salt = new byte[SALT_LENGTH];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(salt); //randomly make a salt
+            Files.write(saltFile.toPath(), salt);
+            return salt;
+        }
     }
 }
