@@ -29,7 +29,7 @@ public class Main {
                         System.out.print("Password: ");
                         String password = scanner.nextLine();
                         vault.addEntry(new PasswordEntry(site, username, password));
-                        System.out.println("✅ Entry added.");
+                        System.out.println("Entry added.");
                         break;
 
                     case "list":
@@ -50,16 +50,16 @@ public class Main {
 
                     case "exit":
                         vault.saveVault();
-                        System.out.println("🔒 Vault saved. Goodbye!");
+                        System.out.println("Vault saved. Goodbye!");
                         return;
 
                     default:
-                        System.out.println("❓ Unknown command. \nCommands: [add, list, get, exit]");
+                        System.out.println("Unknown command. \nCommands: [add, list, get, exit]");
                 }
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Error: " + e.getMessage());
+            System.err.println("Error: " + e.getMessage());
         }
     }
 }

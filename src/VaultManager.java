@@ -15,12 +15,12 @@ public class VaultManager {
         if (file.exists()) {
             loadVault();
         } else {
-            System.out.println("🔑 No vault found — starting fresh.");
+            System.out.println("No vault found — starting fresh.");
         }
     }
 
     public void addEntry(PasswordEntry entry) {
-        entries.put(entry.getSite(), entry);
+        entries.put(entry.getSite(), entry); //call pwEntry class
     }
 
     public PasswordEntry getEntry(String site) {
@@ -39,7 +39,7 @@ public class VaultManager {
     }
 
     public void saveVault() throws Exception {
-        // Convert entries to a simple serialized format (CSV-like)
+        //convert entries to a simple serialized format and write them to file
         StringBuilder builder = new StringBuilder();
         for (PasswordEntry entry : entries.values()) {
             builder.append(entry.getSite()).append(",")
@@ -49,7 +49,7 @@ public class VaultManager {
 
         String encrypted = CryptoUtils.encrypt(builder.toString(), key);
         try (FileWriter writer = new FileWriter(vaultFile)) {
-            writer.write(encrypted);
+            writer.write(encrypted); //write to file
         }
     }
 
@@ -72,6 +72,6 @@ public class VaultManager {
             }
         }
 
-        System.out.println("🔓 Vault loaded with " + entries.size() + " entries.");
+        System.out.println("Vault loaded with " + entries.size() + " entries.");
     }
 }

@@ -8,6 +8,7 @@ import java.util.Base64;
 public class CryptoUtils {
 
     private static final int KEY_SIZE = 256; //final is immutable
+    private static final String SALT_FILE = "salt.bin";
     private static final int ITERATIONS = 65536;
     private static final int SALT_LENGTH = 16;
     private static final int IV_LENGTH = 16;
