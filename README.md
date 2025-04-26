@@ -1,2 +1,8 @@
-This is a simple java password manager.
+README
+
+This is a simple encrypted Java password manager.
+It stores data between sessiosn for seamless use.
+
+Potential future expansions:
 Currently it is file-based, but hope to expand to store passwords in a database.
+A GUI for a friendlier user experience.
