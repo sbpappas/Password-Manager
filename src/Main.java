@@ -16,6 +16,22 @@ public class Main {
             // Load or initialize vault
             VaultManager vault = new VaultManager("vault.dat", key);
 
+            new Thread(() -> { //for auto locking
+                while (true) {
+                    long now = System.currentTimeMillis();
+                    long inactiveTime = now - vault.getLastActivityTime();
+                    if (inactiveTime > 2 * 60 * 1000) { // 2 minutes
+                        System.out.println("\nAuto-locked due to inactivity.");
+                        System.exit(0); // Or redirect to login loop
+                    }
+                    try {
+                        Thread.sleep(5000); // Check every 5 seconds
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }).start();
+            
             while (true) {
                 System.out.print("\n[Commands: add, list, get, exit]\n> ");
                 String command = scanner.nextLine().trim();

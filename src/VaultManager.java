@@ -26,14 +26,17 @@ public class VaultManager {
     }
 
     public void addEntry(PasswordEntry entry) {
+        updateLastActivityTime();
         entries.put(entry.getSite(), entry); //call pwEntry class
     }
 
     public PasswordEntry getEntry(String site) {
+        updateLastActivityTime();
         return entries.get(site);
     }
 
     public void listSites() {
+        updateLastActivityTime();
         if (entries.isEmpty()) {
             System.out.println("Vault is empty.");
             return;
@@ -57,6 +60,14 @@ public class VaultManager {
         FileOutputStream fos = new FileOutputStream(vaultFile);
             fos.write(encrypted);//write to file
             fos.close();
+    }
+
+    public void updateLastActivityTime() {
+        lastActivityTime = System.currentTimeMillis();
+    }
+
+    public long getLastActivityTime(){
+        return lastActivityTime;
     }
 
     private void loadVault() throws Exception {
