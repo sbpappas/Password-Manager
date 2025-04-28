@@ -10,6 +10,8 @@ public class VaultManager {
     private Map<String, PasswordEntry> entries = new HashMap<>();
     private final String vaultFile;
     private final SecretKey key;
+    private long lastActivityTime = System.currentTimeMillis(); //to do auto logout after inactivity
+
 
     public VaultManager(String vaultFile, SecretKey key) throws Exception {
         this.vaultFile = vaultFile;
@@ -53,10 +55,8 @@ public class VaultManager {
 
         byte[] encrypted = CryptoUtils.encrypt(builder.toString().getBytes(StandardCharsets.UTF_8), key); //have to pass in bytearray
         FileOutputStream fos = new FileOutputStream(vaultFile);
-            fos.write(encrypted);
+            fos.write(encrypted);//write to file
             fos.close();
-         //write to file
-        
     }
 
     private void loadVault() throws Exception {
