@@ -22,10 +22,12 @@ public class Main {
                     long inactiveTime = now - vault.getLastActivityTime();
                     if (inactiveTime > 2 * 60 * 1000) { // 2 minutes
                         System.out.println("\nAuto-locked due to inactivity.");
-                        System.exit(0); // Or redirect to login loop
+                        vault.lock(); // Clear sensitive data
+                        System.out.println("\n🔒 Vault auto-locked due to inactivity.");
+                        reAuthenticate(); //redirect to login loop
                     }
                     try {
-                        Thread.sleep(5000); // Check every 5 seconds
+                        Thread.sleep(5000); // every 5 seconds
                     } catch (InterruptedException e) {
                         break;
                     }
@@ -78,4 +80,19 @@ public class Main {
             System.err.println("Error: " + e.getMessage());
         }
     }
+
+    private static void reAuthenticate() { //for auto-locking
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.print("Enter master password to unlock: ");
+            String attempt = scanner.nextLine();
+            if (vault.unlock(attempt)) {
+                System.out.println("Password Vault unlocked.");
+                break;
+            } else {
+                System.out.println("Incorrect password. Try again.");
+            }
+        }
+    }
+    
 }

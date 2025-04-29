@@ -9,19 +9,33 @@ import java.nio.charset.StandardCharsets; //for bytearray to string decryption
 public class VaultManager {
     private Map<String, PasswordEntry> entries = new HashMap<>();
     private final String vaultFile;
-    private final SecretKey key;
+    private SecretKey key;
+    private byte[] salt;
+    private static final String saltFile = "salt.bin";
     private long lastActivityTime = System.currentTimeMillis(); //to do auto logout after inactivity
 
 
-    public VaultManager(String vaultFile, SecretKey key) throws Exception {
+    public VaultManager(String vaultFile, SecretKey key, byte[] salt) throws Exception {
         this.vaultFile = vaultFile;
         this.key = key;
-
+        this.salt = salt;
+    
         File file = new File(vaultFile);
         if (file.exists()) {
             loadVault();
         } else {
-            System.out.println("No vault found — starting fresh.");
+            System.out.println("🔑 No vault found — starting fresh.");
+        }
+    }
+
+    public static byte[] loadOrCreateSalt() throws IOException {
+        File saltFile = new File(saltFile);
+        if (saltFile.exists()) {
+            return Files.readAllBytes(saltFile.toPath());
+        } else {
+            byte[] newSalt = CryptoUtils.generateSalt();
+            Files.write(saltFile.toPath(), newSalt);
+            return newSalt;
         }
     }
 
@@ -68,6 +82,28 @@ public class VaultManager {
 
     public long getLastActivityTime(){
         return lastActivityTime;
+    }
+    
+    public void setKey(SecretKey key) {
+        this.key = key;
+    }
+    
+    public void lock() { // called on auto-lock
+        key = null;
+    }
+
+    public boolean unlock(String password) { //trying to relogin if autologged out
+        try {
+            SecretKey newKey = CryptoUtils.deriveKey(password, salt);
+            // Try decrypting the vault with newKey
+            byte[] encryptedData = Files.readAllBytes(Paths.get(vaultFile));
+            String decrypted = new String(CryptoUtils.decrypt(encryptedData, newKey), StandardCharsets.UTF_8);
+            loadFromString(decrypted);
+            this.key = newKey;
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void loadVault() throws Exception {
