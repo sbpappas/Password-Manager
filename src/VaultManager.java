@@ -29,15 +29,26 @@ public class VaultManager {
     }
 
     public static byte[] loadOrCreateSalt() throws IOException {
-        File saltFile = new File(saltFile);
-        if (saltFile.exists()) {
-            return Files.readAllBytes(saltFile.toPath());
+        File saltFileObj = new File(saltFile);
+        if (saltFileObj.exists()) {
+            return Files.readAllBytes(saltFileObj.toPath());
         } else {
             byte[] newSalt = CryptoUtils.generateSalt();
-            Files.write(saltFile.toPath(), newSalt);
+            Files.write(saltFileObj.toPath(), newSalt);
             return newSalt;
         }
     }
+
+    private void loadFromString(String decrypted) {
+        entries.clear(); // Clear old entries before loading new ones
+        for (String line : decrypted.split("\n")) {
+            String[] parts = line.split(",", 3);
+            if (parts.length == 3) {
+                PasswordEntry entry = new PasswordEntry(parts[0], parts[1], parts[2]);
+                entries.put(parts[0], entry);
+            }
+        }
+    }    
 
     public void addEntry(PasswordEntry entry) {
         updateLastActivityTime();
@@ -95,7 +106,6 @@ public class VaultManager {
     public boolean unlock(String password) { //trying to relogin if autologged out
         try {
             SecretKey newKey = CryptoUtils.deriveKey(password, salt);
-            // Try decrypting the vault with newKey
             byte[] encryptedData = Files.readAllBytes(Paths.get(vaultFile));
             String decrypted = new String(CryptoUtils.decrypt(encryptedData, newKey), StandardCharsets.UTF_8);
             loadFromString(decrypted);
@@ -109,15 +119,7 @@ public class VaultManager {
     private void loadVault() throws Exception {
         byte[] encryptedData = Files.readAllBytes(Paths.get(vaultFile));
         String decrypted = new String(CryptoUtils.decrypt(encryptedData, key), StandardCharsets.UTF_8);
-
-        for (String line : decrypted.split("\n")) {
-            String[] parts = line.split(",", 3);
-            if (parts.length == 3) {
-                PasswordEntry entry = new PasswordEntry(parts[0], parts[1], parts[2]);
-                entries.put(parts[0], entry);
-            }
-        }
-
+        loadFromString(decrypted);
         System.out.println("Vault loaded with " + entries.size() + " entries.");
     }
 }

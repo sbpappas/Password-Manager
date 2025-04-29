@@ -2,6 +2,8 @@ import javax.crypto.SecretKey;
 import java.util.Scanner;
 
 public class Main {
+    private static VaultManager vault;
+
     public static void main(String[] args) {
         System.out.println("Welcome to Samuel's Password Manager");
 
@@ -10,12 +12,11 @@ public class Main {
         String masterPassword = scanner.nextLine();
 
         try {
-            // Derive AES key
-            SecretKey key = CryptoUtils.deriveKey(masterPassword);
 
-            // Load or initialize vault
-            VaultManager vault = new VaultManager("vault.dat", key);
-
+            byte[] salt = VaultManager.loadOrCreateSalt();
+            SecretKey key = CryptoUtils.deriveKey(masterPassword, salt);
+            VaultManager vault = new VaultManager("vault.dat", key, salt); // Load or initialize vault
+            
             new Thread(() -> { //for auto locking
                 while (true) {
                     long now = System.currentTimeMillis();
@@ -69,16 +70,16 @@ public class Main {
                     case "exit":
                         vault.saveVault();
                         System.out.println("Vault saved. Goodbye!");
+                        System.exit(0);
                         return;
 
                     default:
                         System.out.println("Unknown command. \nCommands: [add, list, get, exit]");
                 }
             }
-
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
-        }
+        }    
     }
 
     private static void reAuthenticate() { //for auto-locking
@@ -94,5 +95,6 @@ public class Main {
             }
         }
     }
+   
     
 }
