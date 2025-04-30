@@ -1,20 +1,25 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import javax.crypto.SecretKey;
+
 
 public class VaultApp {
     private JFrame frame;
     private VaultManager vaultManager;
 
     public VaultApp() {
+        // Initialize the vault manager before using it
+    
         frame = new JFrame("Password Vault");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 300);
-
+    
         showLoginScreen();
-
+    
         frame.setVisible(true);
     }
+    
 
     private void showLoginScreen() {
         JPanel panel = new JPanel();
@@ -29,11 +34,24 @@ public class VaultApp {
 
         loginButton.addActionListener(e -> {
             String password = new String(passwordField.getPassword());
-            boolean success = vaultManager.unlock(password);
-            if (success) {
-                showMainScreen();
-            } else {
-                JOptionPane.showMessageDialog(frame, "Incorrect password.");
+            try {
+                // Load the salt (or generate one if it doesn't exist)
+                byte[] salt = VaultManager.loadOrCreateSalt();
+        
+                // Derive the secret key from the password + salt
+                SecretKey key = CryptoUtils.deriveKey(password, salt);
+        
+                // Now initialize vaultManager
+                vaultManager = new VaultManager("vault.json", key, salt);
+        
+                // Unlock vault (if needed)
+                vaultManager.unlock(password);
+        
+                // Move to main vault UI
+                showVaultScreen();
+        
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Login failed: " + ex.getMessage());
             }
         });
 
@@ -42,6 +60,12 @@ public class VaultApp {
         frame.revalidate();
         frame.repaint();
     }
+
+    private void showVaultScreen() {
+        // TODO: Replace with actual vault UI
+        JOptionPane.showMessageDialog(frame, "Login successful! Vault unlocked.");
+    }
+    
 
     private void showMainScreen() {
         JPanel panel = new JPanel();
