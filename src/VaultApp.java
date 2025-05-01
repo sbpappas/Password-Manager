@@ -35,14 +35,12 @@ public class VaultApp {
         loginButton.addActionListener(e -> {
             String password = new String(passwordField.getPassword());
             try {
-                // Load the salt (or generate one if it doesn't exist)
-                byte[] salt = VaultManager.loadOrCreateSalt();
+                byte[] salt = VaultManager.loadOrCreateSalt(); //load  salt (or generate one if it doesn't exist)
         
-                // Derive the secret key from the password + salt
-                SecretKey key = CryptoUtils.deriveKey(password, salt);
+                SecretKey key = CryptoUtils.deriveKey(password, salt); //derive the secret key from the password + salt
         
-                // Now initialize vaultManager
-                vaultManager = new VaultManager("vault.json", key, salt);
+                vaultManager = new VaultManager("vault.json", key, salt); //new vaultManager
+
         
                 // Unlock vault (if needed)
                 vaultManager.unlock(password);
@@ -62,10 +60,10 @@ public class VaultApp {
     }
 
     private void showVaultScreen() {
-        // TODO: Replace with actual vault UI
-        JOptionPane.showMessageDialog(frame, "Login successful! Vault unlocked.");
-    }
-    
+    // TODO: Replace with actual vault UI
+    JOptionPane.showMessageDialog(frame, "Login successful! Vault unlocked.");
+}
+
 
     private void showMainScreen() {
         JPanel panel = new JPanel();
