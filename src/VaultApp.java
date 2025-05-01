@@ -40,12 +40,8 @@ public class VaultApp {
                 SecretKey key = CryptoUtils.deriveKey(password, salt); //derive the secret key from the password + salt
         
                 vaultManager = new VaultManager("vault.json", key, salt); //new vaultManager
-
+                vaultManager.unlock(password); // Unlock vault (if needed)
         
-                // Unlock vault (if needed)
-                vaultManager.unlock(password);
-        
-                // Move to main vault UI
                 showVaultScreen();
         
             } catch (Exception ex) {
