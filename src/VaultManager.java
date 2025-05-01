@@ -24,7 +24,7 @@ public class VaultManager {
         if (file.exists()) {
             loadVault();
         } else {
-            System.out.println("🔑 No vault found — starting fresh.");
+            System.out.println("No vault found — starting fresh.");
         }
     }
 
