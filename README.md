@@ -5,4 +5,4 @@ It stores data between sessions for seamless use.
 
 Potential future expansions:
 Currently it is file-based, but hope to expand to store passwords in a database.
-In development: A GUI for a friendlier user experience would also be sweet.
+In development: A GUI for a friendlier user experience.
