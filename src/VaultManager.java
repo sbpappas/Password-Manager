@@ -60,6 +60,10 @@ public class VaultManager {
         return entries.get(site);
     }
 
+    public Set<String> getSiteNames() {
+        return entries.keySet();
+    }    
+
     public void listSites() {
         updateLastActivityTime();
         if (entries.isEmpty()) {

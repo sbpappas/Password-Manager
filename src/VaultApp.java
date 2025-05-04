@@ -55,12 +55,6 @@ public class VaultApp {
         frame.repaint();
     }
 
-    private void showVaultScreen() {
-    // TODO: Replace with actual vault UI
-    JOptionPane.showMessageDialog(frame, "Login successful! Vault unlocked.");
-}
-
-
     private void showMainScreen() {
         JPanel panel = new JPanel();
         panel.add(new JLabel("Vault unlocked!")); 
@@ -69,6 +63,95 @@ public class VaultApp {
         frame.revalidate();
         frame.repaint();
     }
+
+    private void showVaultScreen() {
+        frame.getContentPane().removeAll(); // clear login UI
+        frame.setTitle("Vault Manager");
+        frame.setLayout(new BorderLayout());
+    
+        // List panel
+        DefaultListModel<String> siteListModel = new DefaultListModel<>();
+        JList<String> siteList = new JList<>(siteListModel);
+        JScrollPane scrollPane = new JScrollPane(siteList);
+        frame.add(scrollPane, BorderLayout.CENTER);
+    
+        // Load existing sites
+        for (String site : vaultManager.getSiteNames()) {
+            siteListModel.addElement(site);
+        }
+    
+        // Button panel
+        JPanel buttonPanel = new JPanel();
+        JButton addButton = new JButton("Add Entry");
+        JButton viewButton = new JButton("View Entry");
+        JButton saveButton = new JButton("Save Vault");
+        JButton lockButton = new JButton("Lock");
+    
+        buttonPanel.add(addButton);
+        buttonPanel.add(viewButton);
+        buttonPanel.add(saveButton);
+        buttonPanel.add(lockButton);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+    
+        // 🔍 View Entry button
+        viewButton.addActionListener(e -> {
+            String selectedSite = siteList.getSelectedValue();
+            if (selectedSite != null) {
+                PasswordEntry entry = vaultManager.getEntry(selectedSite);
+                JOptionPane.showMessageDialog(frame,
+                        "Username: " + entry.getUsername() + "\nPassword: " + entry.getPassword(),
+                        "🔍 Entry for " + selectedSite,
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select a site first.");
+            }
+        });
+    
+        // ➕ Add Entry button
+        addButton.addActionListener(e -> {
+            JTextField siteField = new JTextField();
+            JTextField userField = new JTextField();
+            JTextField passField = new JTextField();
+            Object[] fields = {
+                "Site:", siteField,
+                "Username:", userField,
+                "Password:", passField
+            };
+    
+            int result = JOptionPane.showConfirmDialog(frame, fields, "➕ Add New Entry", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                PasswordEntry newEntry = new PasswordEntry(
+                        siteField.getText(),
+                        userField.getText(),
+                        passField.getText()
+                );
+                vaultManager.addEntry(newEntry);
+                siteListModel.addElement(newEntry.getSite());
+            }
+        });
+    
+        // 💾 Save Vault button
+        saveButton.addActionListener(e -> {
+            try {
+                vaultManager.saveVault();
+                JOptionPane.showMessageDialog(frame, "Vault saved successfully.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Error saving vault: " + ex.getMessage());
+            }
+        });
+    
+        // 🔒 Lock button
+        lockButton.addActionListener(e -> {
+            vaultManager.lock();
+            JOptionPane.showMessageDialog(frame, "Vault locked.");
+            frame.dispose();
+            new VaultApp(); // relaunch app
+        });
+    
+        frame.revalidate();
+        frame.repaint();
+    }
+    
 
     public static void main(String[] args) {
         // Load vault manager here before starting GUI
